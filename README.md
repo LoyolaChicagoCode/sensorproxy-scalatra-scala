@@ -1,12 +1,18 @@
-# My Scalatra Web App #
+# Loyola ETL Scalatra Hello App #
+
+Example involving Swagger and deployment via foreperson.
 
 ## Build & Run ##
 
 ```sh
-$ cd My_Scalatra_Web_App
+$ cd hello-scalatra-scala
 $ sbt
 > container:start
 > browse
 ```
 
 If `browse` doesn't launch your browser, manually open [http://localhost:8080/](http://localhost:8080/) in your browser.
+
+## Deployment ##
+
+Deployable to A/PaaS providers that support foreperson.
