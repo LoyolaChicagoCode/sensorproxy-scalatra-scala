@@ -18,11 +18,9 @@ object JettyLauncher {
     context.addServlet(new ServletHolder(new MyScalatraServlet), "/*")
     context.addServlet(new ServletHolder(new ResourcesApp), "/api-docs/*")
 
-    Thread.sleep(3)
-
     server.setHandler(context)
 
-    Thread.sleep(3)
+    Thread.sleep(5)
 
     server.start
     server.join

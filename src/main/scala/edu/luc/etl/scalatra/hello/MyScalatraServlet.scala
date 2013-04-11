@@ -5,9 +5,10 @@ import scalate.ScalateSupport
 import org.scalatra.swagger.Swagger
 import org.scalatra.json.NativeJsonSupport
 import org.scalatra.swagger.SwaggerSupport
-import org.json4s.{DefaultFormats, Formats}
+import org.json4s.{ DefaultFormats, Formats }
 
-class MyScalatraServlet(implicit val swagger: Swagger) extends MyScalatraWebAppStack with NativeJsonSupport with SwaggerSupport {
+class MyScalatraServlet(implicit val swagger: Swagger)
+  extends MyScalatraWebAppStack with NativeJsonSupport with SwaggerSupport {
 
   implicit override val jsonFormats: Formats = DefaultFormats
 
@@ -24,9 +25,8 @@ class MyScalatraServlet(implicit val swagger: Swagger) extends MyScalatraWebAppS
     <html>
       <body>
         <h1>Hello, world!</h1>
-        Say <a href="hello-scalate">hello to Scalate</a>.
+        <p>Say <a href="hello-scalate">hello to Scalate</a>.</p>
       </body>
     </html>
   }
-
 }
