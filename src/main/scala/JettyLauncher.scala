@@ -15,8 +15,6 @@ object JettyLauncher extends ApiVersion {
 
     context.setContextPath("/")
     context.setResourceBase("src/main/webapp")
-    context.addServlet(new ServletHolder(new SensorProxyServlet), "/*")
-    context.addServlet(new ServletHolder(new ResourcesApp), "/api-docs/*")
 
     server.setHandler(context)
 

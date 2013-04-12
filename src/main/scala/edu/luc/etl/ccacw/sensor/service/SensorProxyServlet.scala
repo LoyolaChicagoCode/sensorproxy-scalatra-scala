@@ -15,7 +15,8 @@ import domain.instance.network
 class SensorProxyServlet(implicit val swagger: Swagger)
   extends SensorProxyWebAppStack
   with NativeJsonSupport
-  with SwaggerSupport {
+  with SwaggerSupport
+  with ApiVersion {
 
   implicit override val jsonFormats: Formats = DefaultFormats
 
@@ -33,7 +34,6 @@ class SensorProxyServlet(implicit val swagger: Swagger)
 //  }
 
   get("/", operation(getRoot)) {
-    val version = "v1alpha" // TODO DRY (reverse URL?!?)
     contentType = formats("html")
 	<html>
 	  <head>
