@@ -4,13 +4,6 @@ import scalaz._
 import Scalaz._
 import model._
 
-object Main extends App {
-  while (true) {
-    Thread.sleep(1000)
-    println(instance.network.map { _.name }.flatten.toList)
-  }
-}
-
 package object instance {
 
   implicit def r2t(r: Resource) = ToTreeOps(r)
