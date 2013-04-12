@@ -1,4 +1,4 @@
-package edu.luc.etl.scalatra.hello
+package edu.luc.etl.ccacw.sensor.service
 
 import org.scalatra._
 import scalate.ScalateSupport
@@ -7,14 +7,13 @@ import org.fusesource.scalate.layout.DefaultLayoutStrategy
 import javax.servlet.http.HttpServletRequest
 import collection.mutable
 
-trait MyScalatraWebAppStack extends ScalatraServlet with ScalateSupport {
+trait SensorProxyWebAppStack extends ScalatraServlet with ScalateSupport {
 
   /* wire up the precompiled templates */
   override protected def defaultTemplatePath: List[String] = List("/WEB-INF/templates/views")
   override protected def createTemplateEngine(config: ConfigT) = {
     val engine = super.createTemplateEngine(config)
-    engine.layoutStrategy = new DefaultLayoutStrategy(engine,
-      TemplateEngine.templateTypes.map("/WEB-INF/templates/layouts/default." + _): _*)
+    engine.layoutStrategy = new DefaultLayoutStrategy(engine,      TemplateEngine.templateTypes.map("/WEB-INF/templates/layouts/default." + _): _*)
     engine.packagePrefix = "templates"
     engine
   }

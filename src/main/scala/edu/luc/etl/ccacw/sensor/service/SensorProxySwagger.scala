@@ -1,4 +1,4 @@
-package edu.luc.etl.scalatra.hello
+package edu.luc.etl.ccacw.sensor.service
 
 import org.scalatra.swagger.{ NativeSwaggerBase, Swagger }
 import org.scalatra.ScalatraServlet
@@ -9,4 +9,4 @@ class ResourcesApp(implicit val swagger: Swagger)
   implicit override val jsonFormats: Formats = DefaultFormats
 }
 
-class MyScalatraSwagger extends Swagger("1.0", "1")
+class SensorProxySwagger extends Swagger("1.0", "1")

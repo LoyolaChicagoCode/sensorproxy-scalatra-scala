@@ -1,14 +1,13 @@
-import edu.luc.etl.scalatra.hello._
-import org.scalatra._
 import javax.servlet.ServletContext
+import org.scalatra._
 import org.scalatra.swagger._
-import edu.luc.etl.scalatra.hello._
+import edu.luc.etl.ccacw.sensor.service._
 
-class ScalatraBootstrap extends LifeCycle {
-  implicit val _ = new MyScalatraSwagger
+class ScalatraBootstrap extends LifeCycle with ApiVersion {
+  implicit val _ = new SensorProxySwagger
   override def init(context: ServletContext) {
-    context.mount(new MyScalatraServlet, "/*")
-    context mount(new ResourcesApp, "/api-docs/*")
+    context.mount(new SensorProxyServlet, "/" + version + "/*")
+    context mount(new ResourcesApp, "/" + version + "/api-docs/*")
   }
 }
 
