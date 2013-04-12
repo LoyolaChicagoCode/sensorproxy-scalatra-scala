@@ -13,7 +13,7 @@ object JettyLauncher extends ApiVersion {
 
     implicit val swagger = new SensorProxySwagger
 
-    context.setContextPath(version)
+    context.setContextPath("/")
     context.setResourceBase("src/main/webapp")
     context.addServlet(new ServletHolder(new SensorProxyServlet), "/*")
     context.addServlet(new ServletHolder(new ResourcesApp), "/api-docs/*")
