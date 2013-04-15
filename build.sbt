@@ -37,7 +37,8 @@ libraryDependencies ++= {
     "org.scalatra"            %% "scalatra-specs2"   % V.scalatra            % "test",
     "org.scalatra"            %% "scalatra-swagger"  % V.scalatra,
     "org.scalatra"            %% "scalatra-json"     % V.scalatra,
-    "org.json4s"              %% "json4s-native"     % "3.2.4",
+    "org.json4s"              %% "json4s-jackson"    % "3.2.4",
+    "com.theoryinpractise"    %  "halbuilder-core"   % "2.0.1",
     "ch.qos.logback"          %  "logback-classic"   % "1.0.6"               % "runtime",
     "org.eclipse.jetty"       %  "jetty-webapp"      % "8.1.8.v20121106"     % "compile;container",
     "org.eclipse.jetty.orbit" %  "javax.servlet"     % "3.0.0.v201112011016" % "compile;container;provided;test" artifacts (Artifact("javax.servlet", "jar", "jar"))

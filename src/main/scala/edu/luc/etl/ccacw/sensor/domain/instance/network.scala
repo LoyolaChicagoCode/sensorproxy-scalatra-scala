@@ -10,7 +10,7 @@ package object instance {
 
   // TODO validation of domain model
   // TODO auto-generate routes
-  // TODO DRY/d
+  // TODO DRY/factories for devices and other common subtrees
 
   def descend[T](loc: TreeLoc[T], path: Stream[T]): Option[TreeLoc[T]] = None
 

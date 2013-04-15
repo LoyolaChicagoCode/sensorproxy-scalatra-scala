@@ -1,11 +1,11 @@
 package edu.luc.etl.ccacw.sensor.service
 
-import org.scalatra.swagger.{ NativeSwaggerBase, Swagger }
+import org.scalatra.swagger.{ JacksonSwaggerBase, Swagger }
 import org.scalatra.ScalatraServlet
 import org.json4s.{ DefaultFormats, Formats }
 
 class ResourcesApp(implicit val swagger: Swagger)
-  extends ScalatraServlet with NativeSwaggerBase {
+  extends ScalatraServlet with JacksonSwaggerBase {
   implicit override val jsonFormats: Formats = DefaultFormats
 }
 

@@ -11,8 +11,6 @@ object JettyLauncher extends ApiVersion {
     val server = new Server(port)
     val context = new WebAppContext
 
-    implicit val swagger = new SensorProxySwagger
-
     context.setContextPath("/")
     context.setResourceBase("src/main/webapp")
 
