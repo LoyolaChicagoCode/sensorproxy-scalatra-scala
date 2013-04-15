@@ -7,6 +7,6 @@ class ScalatraBootstrap extends LifeCycle with ApiVersion {
   implicit val _ = new SensorProxySwagger
   override def init(context: ServletContext) {
     context.mount(new SensorProxyController, "/" + version + "/*")
-    context mount(new ResourcesApp, "/" + version + "/api-docs/*")
+    context mount (new ResourcesApp, "/" + version + "/api-docs/*")
   }
 }

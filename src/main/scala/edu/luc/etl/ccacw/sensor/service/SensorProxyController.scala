@@ -12,7 +12,7 @@ import domain.model._
 import domain.instance.network
 
 class SensorProxyController(implicit val swagger: Swagger) extends SensorProxyWebAppStack
-  with JacksonJsonSupport with SwaggerSupport with HALBuilderSupport with ApiVersion {
+    with JacksonJsonSupport with SwaggerSupport with HALBuilderSupport with ApiVersion {
 
   implicit override val jsonFormats: Formats = DefaultFormats
 
@@ -31,29 +31,29 @@ class SensorProxyController(implicit val swagger: Swagger) extends SensorProxyWe
   )
 
   get("/", operation(getRoot)) {
-    val json = accept("application/json")
-    if (json || accept("application/xml")) {
-      val rf = representationFactory
-      val rep = rf.newRepresentation("/" + version).
-        withLink("devices", "/devices").
-        withLink("measurements", "/measurements").
-        withLink("locations", "/locations")
-      rep.toString(if (json) "application/json" else "application/xml")
-    } else {
+    if (accept("text/html")) {
       // TODO separate template
-	  <html>
-	    <head>
-	      <title>Loyola ETL/CUERP CCACW Sensor Proxy Demo</title>
-	    </head>
-	    <body>
-	    <h1>Loyola ETL/CUERP CCACW Sensor Proxy Demo</h1>
-	      <ul>
-	        <li><a href={ version + "/devices"      }>Devices</a></li>
-	        <li><a href={ version + "/locations"    }>Locations</a></li>
-	        <li><a href={ version + "/measurements" }>Measurements</a></li>
-	      </ul>
-	    </body>
-	  </html>
+      <html>
+        <head>
+          <title>Loyola ETL/CUERP CCACW Sensor Proxy Demo</title>
+        </head>
+        <body>
+          <h1>Loyola ETL/CUERP CCACW Sensor Proxy Demo</h1>
+          <ul>
+            <li><a href={ version + "/devices" }>Devices</a></li>
+            <li><a href={ version + "/locations" }>Locations</a></li>
+            <li><a href={ version + "/measurements" }>Measurements</a></li>
+          </ul>
+        </body>
+      </html>
+    }
+    else {
+      val rf = representationFactory
+      val rep = rf.newRepresentation("/" + version)
+        .withLink("devices", "/devices")
+        .withLink("measurements", "/measurements")
+        .withLink("locations", "/locations")
+      rep.toString(if (accept("application/json")) "application/json" else "application/xml")
     }
   }
 
@@ -67,8 +67,8 @@ class SensorProxyController(implicit val swagger: Swagger) extends SensorProxyWe
       <body>
         <h1>/devices/</h1>
         <ul>
-	    { network.flatten filter { _.isInstanceOf[Device] } map { d => <li> { d } </li> } }
-	    </ul>
+          { network.flatten filter { _.isInstanceOf[Device] } map { d => <li> { d } </li> } }
+        </ul>
       </body>
     </html>
   }
@@ -88,20 +88,20 @@ class SensorProxyController(implicit val swagger: Swagger) extends SensorProxyWe
   get("/devices/:id/?", operation(findDeviceById)) {
     <html>
       <body>
-        <h1>/devices/{params("id")}</h1>
+        <h1>/devices/{ params("id") }</h1>
         <p>
-	    { network.flatten find { n => n.isInstanceOf[Device] && n.asInstanceOf[Device].id == params("id") } }
+          { network.flatten find { n => n.isInstanceOf[Device] && n.asInstanceOf[Device].id == params("id") } }
         </p>
       </body>
     </html>
   }
 
   get("/devices/:id/?", accept("application/json"), operation(findDeviceById)) {
-//    contentType = formats("json")
+    //    contentType = formats("json")
     // this works
     Some(Device("lkj", "ouoiu", "oiuoiu"))
     // this doesn't
-//    { network.flatten find { n => n.isInstanceOf[Device] && n.asInstanceOf[Device].id == params("id") } }.asInstanceOf[Option[Seq[Device]]]
+    //    { network.flatten find { n => n.isInstanceOf[Device] && n.asInstanceOf[Device].id == params("id") } }.asInstanceOf[Option[Seq[Device]]]
   }
 
   val getMeasurements = (apiOperation[Seq[Measurement]]("getMeasurements")
@@ -114,8 +114,8 @@ class SensorProxyController(implicit val swagger: Swagger) extends SensorProxyWe
       <body>
         <h1>/measurements/</h1>
         <ul>
-	    { network.flatten.filter { _.isInstanceOf[Measurement] }. map { _.name }.distinct map { d => <li> { d } </li> } }
-	    </ul>
+          { network.flatten.filter { _.isInstanceOf[Measurement] }.map { _.name }.distinct map { d => <li> { d } </li> } }
+        </ul>
       </body>
     </html>
   }
@@ -131,16 +131,16 @@ class SensorProxyController(implicit val swagger: Swagger) extends SensorProxyWe
   get("/measurements/:name/?", operation(findMeasurementByName)) {
     <html>
       <body>
-        <h1>/measurements/{params("name")}</h1>
+        <h1>/measurements/{ params("name") }</h1>
         <ul>
-        {
-          network.loc.cojoin.toTree.flatten.filter {
-            n => n.getLabel.isInstanceOf[Measurement] && n.getLabel.asInstanceOf[Measurement].name == params("name")
-          }.map {
-            m => <li> { m.getLabel } at { m.parent.get.parent.get.getLabel } </li>
+          {
+            network.loc.cojoin.toTree.flatten.filter {
+              n => n.getLabel.isInstanceOf[Measurement] && n.getLabel.asInstanceOf[Measurement].name == params("name")
+            }.map {
+              m => <li> { m.getLabel } at { m.parent.get.parent.get.getLabel } </li>
+            }
           }
-        }
-	    </ul>
+        </ul>
       </body>
     </html>
   }
@@ -148,14 +148,14 @@ class SensorProxyController(implicit val swagger: Swagger) extends SensorProxyWe
   val getLocations = (apiOperation[Seq[Location]]("getLocations")
     summary "Shows all locations at a given level"
     notes "Shows all locations at the given level in the hierarchy." +
-    	  " Path formats: /locations, /locations/l1/locations, ..., " +
-    	  "/locations/l1/locations/l2/.../locations"
+    " Path formats: /locations, /locations/l1/locations, ..., " +
+    "/locations/l1/locations/l2/.../locations"
   )
 
   get("""^((?:/locations/(?:[^/?#]*?))*?/locations/?)$""".r, operation(getLocations)) {
     <html>
       <body>
-        <p>{multiParams("captures")}</p>
+        <p>{ multiParams("captures") }</p>
       </body>
     </html>
   }
@@ -163,14 +163,14 @@ class SensorProxyController(implicit val swagger: Swagger) extends SensorProxyWe
   val getLocationByName = (apiOperation[Location]("getLocationByName")
     summary "Gets a location at a given level by name"
     notes "Gets a location at the given level in the hierarchy by name." +
-    	  " Path format: /locations/l1, /locations/l1/locations/l2, ..., " +
-    	  "/locations/l1/locations/l2/.../locations/ln"
+    " Path format: /locations/l1, /locations/l1/locations/l2, ..., " +
+    "/locations/l1/locations/l2/.../locations/ln"
   )
 
   get("""^((?:/locations/(?:[^/?#]*?))+?)/?$""".r, operation(getLocationByName)) {
     <html>
       <body>
-        <p>{multiParams("captures").head split "/" filter { _ != "locations" }}</p>
+        <p>{ multiParams("captures").head split "/" filter { _ != "locations" } }</p>
       </body>
     </html>
   }
