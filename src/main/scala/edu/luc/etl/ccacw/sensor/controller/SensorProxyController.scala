@@ -1,5 +1,5 @@
 package edu.luc.etl.ccacw.sensor
-package service
+package controller
 
 import javax.servlet.http.HttpServletRequest
 import org.scalatra._
@@ -8,8 +8,8 @@ import org.scalatra.swagger.Swagger
 import org.scalatra.swagger.SwaggerSupport
 import org.scalatra.json.JacksonJsonSupport
 import org.json4s.{ DefaultFormats, Formats }
-import domain.model._
-import domain.instance.network
+import model._
+import data.network
 
 class SensorProxyController(implicit val swagger: Swagger) extends SensorProxyWebAppStack
     with JacksonJsonSupport with SwaggerSupport with HALBuilderSupport with ApiVersion {
@@ -74,7 +74,7 @@ class SensorProxyController(implicit val swagger: Swagger) extends SensorProxyWe
   }
 
   get("/devices/?", accept("application/json"), operation(getDevices)) {
-    network.flatten filter { _.isInstanceOf[Device] }
+    (network.flatten filter { _.isInstanceOf[Device] } map { _.asInstanceOf[Device] }).asInstanceOf[Stream[Device]]
   }
 
   val findDeviceById = (apiOperation[Device]("findDeviceById")
@@ -97,11 +97,12 @@ class SensorProxyController(implicit val swagger: Swagger) extends SensorProxyWe
   }
 
   get("/devices/:id/?", accept("application/json"), operation(findDeviceById)) {
-    //    contentType = formats("json")
     // this works
-    Some(Device("lkj", "ouoiu", "oiuoiu"))
+    // Some(Device("lkj", "ouoiu", "oiuoiu"))
     // this doesn't
-    //    { network.flatten find { n => n.isInstanceOf[Device] && n.asInstanceOf[Device].id == params("id") } }.asInstanceOf[Option[Seq[Device]]]
+    println({ network.flatten find { n => n.isInstanceOf[Device] && n.asInstanceOf[Device].id == params("id") } }.asInstanceOf[Option[Device]])
+
+    { network.flatten find { n => n.isInstanceOf[Device] && n.asInstanceOf[Device].id == params("id") } }.asInstanceOf[Option[Device]]
   }
 
   val getMeasurements = (apiOperation[Seq[Measurement]]("getMeasurements")

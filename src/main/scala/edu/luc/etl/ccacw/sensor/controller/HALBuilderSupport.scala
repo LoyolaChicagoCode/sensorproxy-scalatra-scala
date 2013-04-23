@@ -1,4 +1,4 @@
-package edu.luc.etl.ccacw.sensor.service
+package edu.luc.etl.ccacw.sensor.controller
 
 import com.theoryinpractise.halbuilder.api.RepresentationFactory
 import com.theoryinpractise.halbuilder.DefaultRepresentationFactory

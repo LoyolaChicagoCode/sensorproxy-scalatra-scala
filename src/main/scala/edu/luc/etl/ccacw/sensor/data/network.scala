@@ -1,10 +1,10 @@
-package edu.luc.etl.ccacw.sensor.domain
+package edu.luc.etl.ccacw.sensor
 
 import scalaz._
 import Scalaz._
 import model._
 
-package object instance {
+package object data {
 
   implicit def r2t(r: Resource) = ToTreeOps(r)
 

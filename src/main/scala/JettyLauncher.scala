@@ -3,7 +3,7 @@ import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.servlet.{ DefaultServlet, ServletContextHandler }
 import org.eclipse.jetty.webapp.WebAppContext
 import org.eclipse.jetty.servlet.ServletHolder
-import edu.luc.etl.ccacw.sensor.service._
+import edu.luc.etl.ccacw.sensor.controller._
 
 object JettyLauncher extends ApiVersion {
   def main(args: Array[String]) {

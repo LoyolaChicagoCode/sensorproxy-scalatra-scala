@@ -1,4 +1,4 @@
-package edu.luc.etl.ccacw.sensor.domain.model
+package edu.luc.etl.ccacw.sensor.model
 
 trait Resource {
   def name: String

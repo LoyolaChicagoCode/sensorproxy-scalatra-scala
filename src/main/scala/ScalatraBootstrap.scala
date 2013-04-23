@@ -1,7 +1,7 @@
 import javax.servlet.ServletContext
 import org.scalatra._
 import org.scalatra.swagger._
-import edu.luc.etl.ccacw.sensor.service._
+import edu.luc.etl.ccacw.sensor.controller._
 
 class ScalatraBootstrap extends LifeCycle with ApiVersion {
   implicit val _ = new SensorProxySwagger

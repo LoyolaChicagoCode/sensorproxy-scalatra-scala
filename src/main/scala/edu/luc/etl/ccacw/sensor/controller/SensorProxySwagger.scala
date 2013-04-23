@@ -1,4 +1,4 @@
-package edu.luc.etl.ccacw.sensor.service
+package edu.luc.etl.ccacw.sensor.controller
 
 import org.scalatra.swagger.{ JacksonSwaggerBase, Swagger }
 import org.scalatra.ScalatraServlet
