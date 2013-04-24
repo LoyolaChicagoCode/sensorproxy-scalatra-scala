@@ -6,13 +6,12 @@ import org.scalatra._
 import org.scalatra.json._
 import org.scalatra.swagger.Swagger
 import org.scalatra.swagger.SwaggerSupport
-import org.scalatra.json.JacksonJsonSupport
 import org.json4s.{ DefaultFormats, Formats }
 import model._
 import data.network
 
 class SensorProxyController(implicit val swagger: Swagger) extends SensorProxyWebAppStack
-    with JacksonJsonSupport with SwaggerSupport with HALBuilderSupport with ApiVersion {
+    with JacksonJsonSupport with JValueResult with SwaggerSupport with HALBuilderSupport with ApiVersion {
 
   implicit override val jsonFormats: Formats = DefaultFormats
 
@@ -74,7 +73,12 @@ class SensorProxyController(implicit val swagger: Swagger) extends SensorProxyWe
   }
 
   get("/devices/?", accept("application/json"), operation(getDevices)) {
-    (network.flatten filter { _.isInstanceOf[Device] } map { _.asInstanceOf[Device] }).asInstanceOf[Stream[Device]]
+    val result: Stream[Device] =
+      (network.flatten filter { _.isInstanceOf[Device] } map { _.asInstanceOf[Device] }).asInstanceOf[Stream[Device]]
+    println(result.toList)
+    val d = new Device(name = "42i", id = "00:11:22:33:44:01", address = "localhost:9501")
+    println(result.head == d)
+    List(d, result.head)
   }
 
   val findDeviceById = (apiOperation[Device]("findDeviceById")

@@ -23,11 +23,11 @@ seq(webSettings :_*)
 
 classpathTypes ~= (_ + "orbit")
 
-resolvers += Classpaths.typesafeReleases
+//resolvers += Classpaths.typesafeReleases
 
 libraryDependencies ++= {
   object V {
-    val scalaz = "7.0.0-M9"
+    val scalaz = "7.0.0"
     val scalatra = "2.2.1"
   }
   Seq(
@@ -39,7 +39,7 @@ libraryDependencies ++= {
     "org.scalatra"            %% "scalatra-json"     % V.scalatra,
     "org.json4s"              %% "json4s-jackson"    % "3.2.4",
     "com.theoryinpractise"    %  "halbuilder-core"   % "2.0.1",
-    "ch.qos.logback"          %  "logback-classic"   % "1.0.6"               % "runtime",
+    "ch.qos.logback"          %  "logback-classic"   % "1.0.11"              % "runtime",
     "org.eclipse.jetty"       %  "jetty-webapp"      % "8.1.8.v20121106"     % "compile;container",
     "org.eclipse.jetty.orbit" %  "javax.servlet"     % "3.0.0.v201112011016" % "compile;container;provided;test" artifacts (Artifact("javax.servlet", "jar", "jar"))
   )
@@ -48,7 +48,6 @@ libraryDependencies ++= {
 apps in container.Configuration <<= (deployment in Compile) map (d => Seq("/api" -> d))
 
 // TODO figure out this logging dependency problem
-
 ivyXML := <dependencies><exclude module="slf4j-log4j12"/></dependencies>
 
 seq(ScalatraPlugin.scalatraWithJRebel: _*)
