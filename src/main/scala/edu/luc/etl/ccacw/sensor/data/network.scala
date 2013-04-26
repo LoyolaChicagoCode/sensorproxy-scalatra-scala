@@ -18,7 +18,7 @@ package object data {
     Location("luc").node(
       Location("lsc").node(
         Location("cuneo").node(
-          (new Device(name = "42i", id = "00:11:22:33:44:01", address = "localhost:9501") with HasFakeReading).node(
+          (new Device(name = "42i", id = "00:11:22:33:44:01", address = "localhost:9501")).node(
             ModbusSetting(name = "unit", offset = 3).node(
               SettingValue(name = "false", value = "ppb").leaf,
               SettingValue(name = "true", value = "ug/m3").leaf
@@ -39,7 +39,7 @@ package object data {
               Reading(name = "max", offset = 24).leaf
             )
           ),
-          (new Device(name = "49i", id = "00:11:22:33:44:02", address = "localhost:9502") with HasFakeReading).node(
+          (new Device(name = "49i", id = "00:11:22:33:44:02", address = "localhost:9502")).node(
             ModbusSetting(name = "unit", offset = 2).node(
               SettingValue(name = "false", value = "ppb").leaf,
               SettingValue(name = "true", value = "ug/m3").leaf
@@ -52,7 +52,7 @@ package object data {
           )
         ),
         Location("damen").node(
-          (new Device(name = "49i", id = "00:11:22:33:44:03", address = "localhost:9503") with HasFakeReading).node(
+          (new Device(name = "49i", id = "00:11:22:33:44:03", address = "localhost:9503")).node(
             ModbusSetting(name = "unit", offset = 2).node(
               SettingValue(name = "false", value = "ppb").leaf,
               SettingValue(name = "true", value = "ug/m3").leaf
@@ -68,7 +68,7 @@ package object data {
       Location("wtc").node(
         Location("baumhart").node(
           Location("rooftop").node(
-            (new Device(name = "42i", id = "00:11:22:33:44:04", address = "localhost:9504") with HasFakeReading).node(
+            (new Device(name = "42i", id = "00:11:22:33:44:04", address = "localhost:9504")).node(
               ModbusSetting(name = "unit", offset = 3).node(
                 SettingValue(name = "false", value = "ppb").leaf,
                 SettingValue(name = "true", value = "ug/m3").leaf
@@ -89,7 +89,7 @@ package object data {
                 Reading(name = "max", offset = 24).leaf
               )
             ),
-            (new Device(name = "49i", id = "00:11:22:33:44:05", address = "localhost:9505") with HasFakeReading).node(
+            (new Device(name = "49i", id = "00:11:22:33:44:05", address = "localhost:9505")).node(
               ModbusSetting(name = "unit", offset = 2).node(
                 SettingValue(name = "false", value = "ppb").leaf,
                 SettingValue(name = "true", value = "ug/m3").leaf
@@ -102,7 +102,7 @@ package object data {
             )
           ),
           Location("basement").node(
-            (new Device(name = "49i", id = "00:11:22:33:44:06", address = "localhost:9506") with HasFakeReading).node(
+            (new Device(name = "49i", id = "00:11:22:33:44:06", address = "localhost:9506")).node(
               ModbusSetting(name = "unit", offset = 2).node(
                 SettingValue(name = "false", value = "ppb").leaf,
                 SettingValue(name = "true", value = "ug/m3").leaf

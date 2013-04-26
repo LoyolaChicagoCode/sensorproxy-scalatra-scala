@@ -8,10 +8,19 @@ import org.scalatra.swagger.Swagger
 import org.scalatra.swagger.SwaggerSupport
 import org.json4s.{ DefaultFormats, Formats }
 import model._
+import views._
 import data.network
+import org.json4s.Extraction
+import twirl.api.Template1
 
-class SensorProxyController(implicit val swagger: Swagger) extends SensorProxyWebAppStack
-    with JacksonJsonSupport with JValueResult with SwaggerSupport with HALBuilderSupport with ApiVersion {
+// finish templates
+// TODO navigation into tree
+// TODO tests
+// TODO mongo/salat
+
+class SensorProxyController(implicit val swagger: Swagger) extends ScalatraServlet
+    with JacksonJsonSupport with JValueResult with ApiFormats
+    with SwaggerSupport with ApiVersion {
 
   implicit override val jsonFormats: Formats = DefaultFormats
 
@@ -24,35 +33,17 @@ class SensorProxyController(implicit val swagger: Swagger) extends SensorProxyWe
     mediaTypes.exists { accept.contains(_) }
   }
 
+  def renderAsJsonOrHtml[T, U >: T](view: twirl.api.Template1[T, twirl.api.Html])(result: U)(implicit request: HttpServletRequest) =
+    if (accept("application/json")) result else view.render(result.asInstanceOf[T])
+
   val getRoot = (apiOperation[String]("getRoot")
     summary "Show root"
     notes "Shows root. Doesn't do much else."
   )
 
   get("/", operation(getRoot)) {
-    if (accept("text/html")) {
-      // TODO separate template
-      <html>
-        <head>
-          <title>Loyola ETL/CUERP CCACW Sensor Proxy Demo</title>
-        </head>
-        <body>
-          <h1>Loyola ETL/CUERP CCACW Sensor Proxy Demo</h1>
-          <ul>
-            <li><a href={ version + "/devices" }>Devices</a></li>
-            <li><a href={ version + "/locations" }>Locations</a></li>
-            <li><a href={ version + "/measurements" }>Measurements</a></li>
-          </ul>
-        </body>
-      </html>
-    }
-    else {
-      val rf = representationFactory
-      val rep = rf.newRepresentation("/" + version)
-        .withLink("devices", "/devices")
-        .withLink("measurements", "/measurements")
-        .withLink("locations", "/locations")
-      rep.toString(if (accept("application/json")) "application/json" else "application/xml")
+    renderAsJsonOrHtml(html.index) {
+      Seq("devices", "locations", "measurements") map { v => (v.capitalize, relativeUrl("/" + v)) } toMap
     }
   }
 
@@ -62,23 +53,9 @@ class SensorProxyController(implicit val swagger: Swagger) extends SensorProxyWe
   )
 
   get("/devices/?", operation(getDevices)) {
-    <html>
-      <body>
-        <h1>/devices/</h1>
-        <ul>
-          { network.flatten filter { _.isInstanceOf[Device] } map { d => <li> { d } </li> } }
-        </ul>
-      </body>
-    </html>
-  }
-
-  get("/devices/?", accept("application/json"), operation(getDevices)) {
-    val result: Stream[Device] =
-      (network.flatten filter { _.isInstanceOf[Device] } map { _.asInstanceOf[Device] }).asInstanceOf[Stream[Device]]
-    println(result.toList)
-    val d = new Device(name = "42i", id = "00:11:22:33:44:01", address = "localhost:9501")
-    println(result.head == d)
-    List(d, result.head)
+    renderAsJsonOrHtml(html.devices) {
+      network.flatten.filter(_.isInstanceOf[Device]).asInstanceOf[Iterable[Device]]
+    }
   }
 
   val findDeviceById = (apiOperation[Device]("findDeviceById")
@@ -90,23 +67,14 @@ class SensorProxyController(implicit val swagger: Swagger) extends SensorProxyWe
   )
 
   get("/devices/:id/?", operation(findDeviceById)) {
-    <html>
-      <body>
-        <h1>/devices/{ params("id") }</h1>
-        <p>
-          { network.flatten find { n => n.isInstanceOf[Device] && n.asInstanceOf[Device].id == params("id") } }
-        </p>
-      </body>
-    </html>
-  }
-
-  get("/devices/:id/?", accept("application/json"), operation(findDeviceById)) {
-    // this works
-    // Some(Device("lkj", "ouoiu", "oiuoiu"))
-    // this doesn't
-    println({ network.flatten find { n => n.isInstanceOf[Device] && n.asInstanceOf[Device].id == params("id") } }.asInstanceOf[Option[Device]])
-
-    { network.flatten find { n => n.isInstanceOf[Device] && n.asInstanceOf[Device].id == params("id") } }.asInstanceOf[Option[Device]]
+    val id = params("id")
+    renderAsJsonOrHtml(html.device) {
+      {
+        network.flatten find {
+          n => n.isInstanceOf[Device] && n.asInstanceOf[Device].id == id
+        }
+      }.asInstanceOf[Option[Device]]
+    }
   }
 
   val getMeasurements = (apiOperation[Seq[Measurement]]("getMeasurements")
@@ -115,14 +83,18 @@ class SensorProxyController(implicit val swagger: Swagger) extends SensorProxyWe
   )
 
   get("/measurements/?", operation(getMeasurements)) {
-    <html>
-      <body>
-        <h1>/measurements/</h1>
-        <ul>
-          { network.flatten.filter { _.isInstanceOf[Measurement] }.map { _.name }.distinct map { d => <li> { d } </li> } }
-        </ul>
-      </body>
-    </html>
+    val result = network.flatten.filter { _.isInstanceOf[Measurement] }.map { _.name }.distinct
+    if (accept("application/json"))
+      result
+    else
+      <html>
+        <body>
+          <h1>/measurements/</h1>
+          <ul>
+            { result map { d => <li> { d } </li> } }
+          </ul>
+        </body>
+      </html>
   }
 
   val findMeasurementByName = (apiOperation[Measurement]("findMeasurementByName")
@@ -134,20 +106,20 @@ class SensorProxyController(implicit val swagger: Swagger) extends SensorProxyWe
   )
 
   get("/measurements/:name/?", operation(findMeasurementByName)) {
-    <html>
-      <body>
-        <h1>/measurements/{ params("name") }</h1>
-        <ul>
-          {
-            network.loc.cojoin.toTree.flatten.filter {
-              n => n.getLabel.isInstanceOf[Measurement] && n.getLabel.asInstanceOf[Measurement].name == params("name")
-            }.map {
-              m => <li> { m.getLabel } at { m.parent.get.parent.get.getLabel } </li>
-            }
-          }
-        </ul>
-      </body>
-    </html>
+    val result = network.loc.cojoin.toTree.flatten filter {
+      n => n.getLabel.isInstanceOf[Measurement] && n.getLabel.asInstanceOf[Measurement].name == params("name")
+    }
+    if (accept("application/json"))
+      result
+    else
+      <html>
+        <body>
+          <h1>/measurements/{ params("name") }</h1>
+          <ul>
+            { result map { m => <li> { m.getLabel } at { m.parent.get.parent.get.getLabel } </li> } }
+          </ul>
+        </body>
+      </html>
   }
 
   val getLocations = (apiOperation[Seq[Location]]("getLocations")

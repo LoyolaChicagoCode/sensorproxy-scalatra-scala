@@ -1,0 +1,7 @@
+@(resources: Map[String, String])
+
+@main("Available Resources") {
+  <ul>
+    @resources.map { e => <li><a href="@e._2/">@e._1</a></li> }
+  </ul>
+}

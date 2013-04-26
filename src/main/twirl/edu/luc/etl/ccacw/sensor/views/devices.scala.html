@@ -1,0 +1,7 @@
+@(ds: Iterable[edu.luc.etl.ccacw.sensor.model.Device])
+
+@main("Devices") {
+  <ul>
+    @ds.toSeq.map { d => <li>@d</li> }
+  </ul>
+}

@@ -8,6 +8,7 @@ Example involving Swagger and deployment via foreperson.
 $ cd sensorproxy-scalatra-scala
 $ sbt
 > container:start
+> ~ ;copy-resources;aux-compile
 > browse
 ```
 
