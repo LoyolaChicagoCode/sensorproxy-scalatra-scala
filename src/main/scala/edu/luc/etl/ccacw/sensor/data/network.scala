@@ -12,7 +12,16 @@ package object data {
   // TODO auto-generate routes
   // TODO DRY/factories for devices and other common subtrees
 
-  def descend[T](loc: TreeLoc[T], path: Stream[T]): Option[TreeLoc[T]] = None
+  // TODO convert to (nonrecursive) algebraic form
+  def descend[T <: { def name: String }](path: Seq[String])(loc: TreeLoc[T]): Option[TreeLoc[T]] =
+    if (!path.isEmpty && loc.getLabel.name != path.head)
+      None
+    else if (path.tail.isEmpty)
+      Some(loc)
+    else
+      Some(loc) flatMap { _.findChild { _.rootLabel.name == path.tail.head } } flatMap { descend(path.tail)(_) }
+
+  //  Seq("luc", "wtc", "baumhart").headOption filter { _ == network.loc.getLabel.name } map { _ => network.loc }
 
   val network: Tree[Resource] =
     Location("luc").node(

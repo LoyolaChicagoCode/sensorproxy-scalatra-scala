@@ -7,13 +7,13 @@ import org.scalatra.json._
 import org.scalatra.swagger.Swagger
 import org.scalatra.swagger.SwaggerSupport
 import org.json4s.{ DefaultFormats, Formats }
-import model._
-import views._
-import data.network
 import org.json4s.Extraction
 import twirl.api.Template1
+import model._
+import views._
+import data._
 
-// finish templates
+// TODO finish templates
 // TODO navigation into tree
 // TODO tests
 // TODO mongo/salat
@@ -33,8 +33,15 @@ class SensorProxyController(implicit val swagger: Swagger) extends ScalatraServl
     mediaTypes.exists { accept.contains(_) }
   }
 
-  def renderAsJsonOrHtml[T, U >: T](view: twirl.api.Template1[T, twirl.api.Html])(result: U)(implicit request: HttpServletRequest) =
-    if (accept("application/json")) result else view.render(result.asInstanceOf[T])
+  implicit def resourceDowncast[T](r: Resource): T = r.asInstanceOf[T]
+
+  implicit def resourceIterableDowncast[M[_], T, U >: T](m: M[U]): M[T] = m.asInstanceOf[M[T]]
+
+  def renderAsJsonOrHtml[T, U >: T](view: twirl.api.Template1[T, twirl.api.Html])(result: U)(implicit request: HttpServletRequest, u2t: U => T) =
+    if (accept("application/json")) result else view.render(result)
+
+  def renderAsJsonOrHtml[S, T, U >: T](view: twirl.api.Template2[S, T, twirl.api.Html])(s: S)(result: U)(implicit request: HttpServletRequest, u2t: U => T) =
+    if (accept("application/json")) result else view.render(s, result)
 
   val getRoot = (apiOperation[String]("getRoot")
     summary "Show root"
@@ -54,7 +61,7 @@ class SensorProxyController(implicit val swagger: Swagger) extends ScalatraServl
 
   get("/devices/?", operation(getDevices)) {
     renderAsJsonOrHtml(html.devices) {
-      network.flatten.filter(_.isInstanceOf[Device]).asInstanceOf[Iterable[Device]]
+      network.flatten filter { _.isInstanceOf[Device] }
     }
   }
 
@@ -62,18 +69,18 @@ class SensorProxyController(implicit val swagger: Swagger) extends ScalatraServl
     summary "Finds a device by ID"
     notes "Finds a device by ID."
     parameters (
-      pathParam[String]("id").description("ID of device that needs to be found")
+      pathParam[String]("id").description("ID of desired device")
     )
   )
 
   get("/devices/:id/?", operation(findDeviceById)) {
     val id = params("id")
-    renderAsJsonOrHtml(html.device) {
-      {
-        network.flatten find {
-          n => n.isInstanceOf[Device] && n.asInstanceOf[Device].id == id
-        }
-      }.asInstanceOf[Option[Device]]
+    network.flatten find {
+      n => n.isInstanceOf[Device] && n.asInstanceOf[Device].id == id
+    } map {
+      renderAsJsonOrHtml(html.device)(_)
+    } getOrElse {
+      NotFound(())
     }
   }
 
@@ -83,43 +90,26 @@ class SensorProxyController(implicit val swagger: Swagger) extends ScalatraServl
   )
 
   get("/measurements/?", operation(getMeasurements)) {
-    val result = network.flatten.filter { _.isInstanceOf[Measurement] }.map { _.name }.distinct
-    if (accept("application/json"))
-      result
-    else
-      <html>
-        <body>
-          <h1>/measurements/</h1>
-          <ul>
-            { result map { d => <li> { d } </li> } }
-          </ul>
-        </body>
-      </html>
+    renderAsJsonOrHtml(html.measurementNames) {
+      network.flatten filter { _.isInstanceOf[Measurement] } map { _.name } distinct
+    }
   }
 
-  val findMeasurementByName = (apiOperation[Measurement]("findMeasurementByName")
-    summary "Finds a measurement by name"
-    notes "Finds a measurement by name."
+  val filterMeasurementsByName = (apiOperation[Measurement]("filterMeasurementsByName")
+    summary "Filters measurements by name"
+    notes "Filters measurements by name."
     parameters (
-      pathParam[String]("name").description("Name of measurement that needs to be found")
+      pathParam[String]("name").description("Name of desired measurement")
     )
   )
 
-  get("/measurements/:name/?", operation(findMeasurementByName)) {
-    val result = network.loc.cojoin.toTree.flatten filter {
-      n => n.getLabel.isInstanceOf[Measurement] && n.getLabel.asInstanceOf[Measurement].name == params("name")
+  get("/measurements/:name/?", operation(filterMeasurementsByName)) {
+    val name = params("name")
+    renderAsJsonOrHtml(html.measurements)(name) {
+      network.loc.cojoin.toTree.flatten filter {
+        n => n.getLabel.isInstanceOf[Measurement] && n.getLabel.asInstanceOf[Measurement].name == name
+      }
     }
-    if (accept("application/json"))
-      result
-    else
-      <html>
-        <body>
-          <h1>/measurements/{ params("name") }</h1>
-          <ul>
-            { result map { m => <li> { m.getLabel } at { m.parent.get.parent.get.getLabel } </li> } }
-          </ul>
-        </body>
-      </html>
   }
 
   val getLocations = (apiOperation[Seq[Location]]("getLocations")
@@ -145,10 +135,12 @@ class SensorProxyController(implicit val swagger: Swagger) extends ScalatraServl
   )
 
   get("""^((?:/locations/(?:[^/?#]*?))+?)/?$""".r, operation(getLocationByName)) {
-    <html>
-      <body>
-        <p>{ multiParams("captures").head split "/" filter { _ != "locations" } }</p>
-      </body>
-    </html>
+    val path = multiParams("captures").head split "/" filter { _ != "locations" }
+    val loc = descend(path.tail)(network.loc)
+    loc map {
+      renderAsJsonOrHtml(html.location)(_)
+    } getOrElse {
+      NotFound(())
+    }
   }
 }

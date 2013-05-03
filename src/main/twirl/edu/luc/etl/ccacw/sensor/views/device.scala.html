@@ -1,6 +1,6 @@
-@(d: Option[edu.luc.etl.ccacw.sensor.model.Device])
+@(d: edu.luc.etl.ccacw.sensor.model.Device)
 
-@main("Device " + d.get.id) {
+@main("Device " + d.id) {
   <p>
     @d
   </p>
