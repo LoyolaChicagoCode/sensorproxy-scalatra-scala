@@ -1,0 +1,7 @@
+@(ms: Iterable[String])
+
+@main("Measurements") {
+  <ul>
+    @ms.toSeq.map { m => <li>@m</li> }
+  </ul>
+}

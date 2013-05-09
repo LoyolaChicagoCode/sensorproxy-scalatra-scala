@@ -1,0 +1,7 @@
+@(n: String, ms: Iterable[scalaz.TreeLoc[edu.luc.etl.ccacw.sensor.model.Resource]])
+
+@main("Measurements for " + n) {
+  <ul>
+    @ms.toSeq.map { m => <li>@m.getLabel at @m.parent.get.parent.get.getLabel</li> }
+  </ul>
+}
