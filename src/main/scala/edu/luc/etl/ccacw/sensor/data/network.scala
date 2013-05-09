@@ -14,12 +14,22 @@ package object data {
 
   // TODO convert to (nonrecursive) algebraic form
   def descend[T <: { def name: String }](path: Seq[String])(loc: TreeLoc[T]): Option[TreeLoc[T]] =
+    if (path.isEmpty) Some(loc) else descend1(path)(loc)
+
+  //  def descend[T <: { def name: String }](path: Seq[String])(loc: TreeLoc[T]): Option[TreeLoc[T]] =
+  //    if (path.isEmpty)
+  //      Some(loc)
+  //    else if (loc.getLabel.name == path.head)
+  //
+  //      Some(loc) flatMap { _.findChild { _.rootLabel.name == path.head } } flatMap { descend1(path.tail)(_) }
+
+  def descend1[T <: { def name: String }](path: Seq[String])(loc: TreeLoc[T]): Option[TreeLoc[T]] =
     if (!path.isEmpty && loc.getLabel.name != path.head)
       None
     else if (path.tail.isEmpty)
       Some(loc)
     else
-      Some(loc) flatMap { _.findChild { _.rootLabel.name == path.tail.head } } flatMap { descend(path.tail)(_) }
+      Some(loc) flatMap { _.findChild { _.rootLabel.name == path.tail.head } } flatMap { descend1(path.tail)(_) }
 
   //  Seq("luc", "wtc", "baumhart").headOption filter { _ == network.loc.getLabel.name } map { _ => network.loc }
 
