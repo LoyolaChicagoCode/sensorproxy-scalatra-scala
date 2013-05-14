@@ -1,0 +1,7 @@
+@(n: String, ls: Iterable[scalaz.TreeLoc[edu.luc.etl.ccacw.sensor.model.Resource]])
+
+@main("Locations at for " + n) {
+  <ul>
+    @ls.toSeq.map { l => <li>@l.getLabel</li> }
+  </ul>
+}

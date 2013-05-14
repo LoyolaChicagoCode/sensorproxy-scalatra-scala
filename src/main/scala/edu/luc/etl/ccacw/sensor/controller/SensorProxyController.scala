@@ -120,11 +120,15 @@ class SensorProxyController(implicit val swagger: Swagger) extends ScalatraServl
   )
 
   get("""^((?:/locations/(?:[^/?#]*?))*?/locations/?)$""".r, operation(getLocations)) {
-    <html>
-      <body>
-        <p>{ multiParams("captures") }</p>
-      </body>
-    </html>
+    val path = multiParams("captures").head split "/" filter { _ != "locations" }
+    val loc = descend(path.tail)(network.loc)
+    loc map { l =>
+      renderAsJsonOrHtml(html.locations)("asdf") {
+        l.toTree.subForest map { _.loc }
+      }
+    } getOrElse {
+      NotFound(())
+    }
   }
 
   val getLocationByName = (apiOperation[Location]("getLocationByName")
