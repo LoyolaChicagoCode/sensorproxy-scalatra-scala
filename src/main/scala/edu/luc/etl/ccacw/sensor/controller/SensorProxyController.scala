@@ -17,6 +17,7 @@ import data._
 // TODO navigation into tree
 // TODO tests
 // TODO mongo/salat
+// TODO support for typesafe (schema-aware) XML representations (and convert to JSON as a separate concern)
 
 class SensorProxyController(implicit val swagger: Swagger) extends ScalatraServlet
     with JacksonJsonSupport with JValueResult with ApiFormats
