@@ -1,7 +1,7 @@
-@(n: String, ls: Iterable[scalaz.TreeLoc[edu.luc.etl.ccacw.sensor.model.Resource]])
+@(t: scalaz.Tree[scalaz.TreeLoc[edu.luc.etl.ccacw.sensor.model.Resource]])
 
-@main("Locations at for " + n) {
+@main("Locations at " + t.rootLabel.path.toList.map(_.name).reverse.mkString("/", "/", "")) {
   <ul>
-    @ls.toSeq.map { l => <li>@l.getLabel</li> }
+    @t.subForest.map { l => <li>@l.rootLabel.getLabel</li> }
   </ul>
 }

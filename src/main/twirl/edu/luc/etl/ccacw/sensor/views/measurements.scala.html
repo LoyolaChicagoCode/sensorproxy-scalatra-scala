@@ -2,6 +2,6 @@
 
 @main("Measurements for " + n) {
   <ul>
-    @ms.toSeq.map { m => <li>@m.getLabel at @m.parent.get.parent.get.getLabel</li> }
+    @ms.toSeq.map { m => <li>@m.getLabel at @m.parent.get.parent.get.path.reverse.mkString(" / ")</li> }
   </ul>
 }

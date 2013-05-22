@@ -1,5 +1,7 @@
 package edu.luc.etl.ccacw.sensor.model
 
+// TODO factories/validation?
+
 trait Resource {
   def name: String
 }

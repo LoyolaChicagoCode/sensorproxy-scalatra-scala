@@ -1,6 +1,6 @@
 @(l: scalaz.TreeLoc[edu.luc.etl.ccacw.sensor.model.Resource])
 
-@main("Location " + l.path.toList.map { _.name } .reverse) {
+@main("Location " + l.path.toList.map(_.name).reverse.mkString("/", "/", "")) {
   <p>
     @l.getLabel
   </p>

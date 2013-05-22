@@ -13,6 +13,7 @@ scalacOptions := Seq(
   "-language:implicitConversions",
   "-language:postfixOps",
   "-language:higherKinds",
+  "-language:reflectiveCalls",
   "-feature",
   "-unchecked",
   "-deprecation",
@@ -38,11 +39,11 @@ libraryDependencies ++= {
     "org.scalatra"            %% "scalatra"          % V.scalatra,
     "org.scalatra"            %% "scalatra-specs2"   % V.scalatra            % "test",
     "org.scalatra"            %% "scalatra-swagger"  % V.scalatra,
-    "org.scalatra"            %% "scalatra-json"             % V.scalatra,
-    "org.json4s"              %% "json4s-jackson"            % "3.2.4",
-    "com.novus"               %% "salat"                     % "1.9.2-SNAPSHOT",
+    "org.scalatra"            %% "scalatra-json"     % V.scalatra,
+    "org.json4s"              %% "json4s-jackson"    % "3.2.4",
+    "com.novus"               %% "salat"             % "1.9.2-SNAPSHOT",
     "org.zeromq"              %  "zeromq-scala-binding_2.10" % "0.0.7",
-    "ch.qos.logback"          %  "logback-classic"   % "1.0.11"              % "runtime",
+    "ch.qos.logback"          %  "logback-classic"   % "1.0.13"              % "runtime",
     "org.eclipse.jetty"       %  "jetty-webapp"      % "8.1.10.v20130312"    % "compile;container",
     "org.eclipse.jetty.orbit" %  "javax.servlet"     % "3.0.0.v201112011016" % "compile;container;provided;test" artifacts (Artifact("javax.servlet", "jar", "jar"))
   )
