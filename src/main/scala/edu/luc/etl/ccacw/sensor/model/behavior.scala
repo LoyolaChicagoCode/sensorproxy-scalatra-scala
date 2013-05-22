@@ -1,7 +1,8 @@
 package edu.luc.etl.ccacw.sensor
 
-import scalaz._
-import Scalaz._
+import scalaz.{ Show, Tree, TreeLoc }
+import scalaz.std.option._
+import scalaz.syntax.tree._
 
 package object model {
 
@@ -9,12 +10,12 @@ package object model {
 
   implicit object shl extends Show[TreeLoc[Resource]] { override def shows(r: TreeLoc[Resource]) = "->" + r.toString }
 
-  implicit def r2t(r: Resource) = ToTreeOps(r)
+  implicit val r2t = ToTreeOps[Resource] _
 
   // TODO validation of domain model
   // TODO auto-generate routes
 
-  implicit val dummy = new Resource { val name = "" }
+  implicit def dummy = new Resource { val name = "" }
 
   def descend[T <: { def name: String }](path: Iterable[String])(locs: Stream[Tree[TreeLoc[T]]])(implicit dummy: T): Option[Tree[TreeLoc[T]]] =
     path.foldLeft {

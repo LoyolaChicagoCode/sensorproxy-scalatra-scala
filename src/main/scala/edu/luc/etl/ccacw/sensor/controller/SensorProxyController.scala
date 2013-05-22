@@ -14,7 +14,6 @@ import views._
 import data._
 
 // DONE finish templates
-// TODO clean up navigation into tree
 // TODO tests
 // TODO mongo/salat
 // TODO improve representations for demoing

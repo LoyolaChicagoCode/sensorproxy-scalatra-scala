@@ -1,7 +1,7 @@
 package edu.luc.etl.ccacw.sensor
 
-import scalaz._
-import Scalaz._
+import scalaz.Tree
+import scalaz.syntax.tree._
 import model._
 
 package object data {
