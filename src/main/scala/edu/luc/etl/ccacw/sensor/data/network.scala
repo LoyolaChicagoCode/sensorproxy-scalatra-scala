@@ -6,32 +6,7 @@ import model._
 
 package object data {
 
-  implicit def r2t(r: Resource) = ToTreeOps(r)
-
-  // TODO validation of domain model
-  // TODO auto-generate routes
   // TODO DRY/factories for devices and other common subtrees
-
-  // TODO convert to (nonrecursive) algebraic form
-  def descend[T <: { def name: String }](path: Seq[String])(loc: TreeLoc[T]): Option[TreeLoc[T]] =
-    if (path.isEmpty) Some(loc) else descend1(path)(loc)
-
-  //  def descend[T <: { def name: String }](path: Seq[String])(loc: TreeLoc[T]): Option[TreeLoc[T]] =
-  //    if (path.isEmpty)
-  //      Some(loc)
-  //    else if (loc.getLabel.name == path.head)
-  //
-  //      Some(loc) flatMap { _.findChild { _.rootLabel.name == path.head } } flatMap { descend1(path.tail)(_) }
-
-  def descend1[T <: { def name: String }](path: Seq[String])(loc: TreeLoc[T]): Option[TreeLoc[T]] =
-    if (!path.isEmpty && loc.getLabel.name != path.head)
-      None
-    else if (path.tail.isEmpty)
-      Some(loc)
-    else
-      Some(loc) flatMap { _.findChild { _.rootLabel.name == path.tail.head } } flatMap { descend1(path.tail)(_) }
-
-  //  Seq("luc", "wtc", "baumhart").headOption filter { _ == network.loc.getLabel.name } map { _ => network.loc }
 
   val network: Tree[Resource] =
     Location("luc").node(
@@ -132,6 +107,19 @@ package object data {
                 Reading(name = "max", offset = 20).leaf
               )
             )
+          )
+        )
+      ),
+      Location("malibu").node(
+        (new Device(name = "49i", id = "00:11:22:33:44:06", address = "localhost:9506")).node(
+          ModbusSetting(name = "unit", offset = 2).node(
+            SettingValue(name = "false", value = "ppb").leaf,
+            SettingValue(name = "true", value = "ug/m3").leaf
+          ),
+          Measurement("o3").node(
+            Reading(name = "current", offset = 0).leaf,
+            Reading(name = "min", offset = 10).leaf,
+            Reading(name = "max", offset = 20).leaf
           )
         )
       )

@@ -13,11 +13,17 @@ import model._
 import views._
 import data._
 
-// TODO finish templates
-// TODO navigation into tree
+// DONE finish templates
+// TODO clean up navigation into tree
 // TODO tests
 // TODO mongo/salat
+// TODO improve representations for demoing
 // TODO support for typesafe (schema-aware) XML representations (and convert to JSON as a separate concern)
+//      or take another look at JSON schema
+// TODO write side of the web: device registration
+// TODO distill/articulate insights on variably-composite resources
+//      (as opposed to fixed resource hierarchies)
+// TODO dependency injection of model
 
 class SensorProxyController(implicit val swagger: Swagger) extends ScalatraServlet
     with JacksonJsonSupport with JValueResult with ApiFormats
@@ -38,11 +44,13 @@ class SensorProxyController(implicit val swagger: Swagger) extends ScalatraServl
 
   implicit def resourceIterableDowncast[M[_], T, U >: T](m: M[U]): M[T] = m.asInstanceOf[M[T]]
 
-  def renderAsJsonOrHtml[T, U >: T](view: twirl.api.Template1[T, twirl.api.Html])(result: U)(implicit request: HttpServletRequest, u2t: U => T) =
+  def represent[T, U >: T](view: twirl.api.Template1[T, twirl.api.Html])(result: U)(implicit request: HttpServletRequest, u2t: U => T) =
     if (accept("application/json")) result else view.render(result)
 
-  def renderAsJsonOrHtml[S, T, U >: T](view: twirl.api.Template2[S, T, twirl.api.Html])(s: S)(result: U)(implicit request: HttpServletRequest, u2t: U => T) =
+  def represent[S, T, U >: T](view: twirl.api.Template2[S, T, twirl.api.Html])(s: S)(result: U)(implicit request: HttpServletRequest, u2t: U => T) =
     if (accept("application/json")) result else view.render(s, result)
+
+  val networkNavigable = network.loc.cojoin.toTree
 
   val getRoot = (apiOperation[String]("getRoot")
     summary "Show root"
@@ -50,7 +58,7 @@ class SensorProxyController(implicit val swagger: Swagger) extends ScalatraServl
   )
 
   get("/", operation(getRoot)) {
-    renderAsJsonOrHtml(html.index) {
+    represent(html.index) {
       Seq("devices", "locations", "measurements") map { v => (v.capitalize, relativeUrl("/" + v)) } toMap
     }
   }
@@ -61,7 +69,7 @@ class SensorProxyController(implicit val swagger: Swagger) extends ScalatraServl
   )
 
   get("/devices/?", operation(getDevices)) {
-    renderAsJsonOrHtml(html.devices) {
+    represent(html.devices) {
       network.flatten filter { _.isInstanceOf[Device] }
     }
   }
@@ -79,7 +87,7 @@ class SensorProxyController(implicit val swagger: Swagger) extends ScalatraServl
     network.flatten find {
       n => n.isInstanceOf[Device] && n.asInstanceOf[Device].id == id
     } map {
-      renderAsJsonOrHtml(html.device)(_)
+      represent(html.device)(_)
     } getOrElse {
       NotFound(())
     }
@@ -91,7 +99,7 @@ class SensorProxyController(implicit val swagger: Swagger) extends ScalatraServl
   )
 
   get("/measurements/?", operation(getMeasurements)) {
-    renderAsJsonOrHtml(html.measurementNames) {
+    represent(html.measurementNames) {
       network.flatten filter { _.isInstanceOf[Measurement] } map { _.name } distinct
     }
   }
@@ -106,29 +114,10 @@ class SensorProxyController(implicit val swagger: Swagger) extends ScalatraServl
 
   get("/measurements/:name/?", operation(filterMeasurementsByName)) {
     val name = params("name")
-    renderAsJsonOrHtml(html.measurements)(name) {
-      network.loc.cojoin.toTree.flatten filter {
+    represent(html.measurements)(name) {
+      networkNavigable.flatten filter {
         n => n.getLabel.isInstanceOf[Measurement] && n.getLabel.asInstanceOf[Measurement].name == name
       }
-    }
-  }
-
-  val getLocations = (apiOperation[Seq[Location]]("getLocations")
-    summary "Shows all locations at a given level"
-    notes "Shows all locations at the given level in the hierarchy." +
-    " Path formats: /locations, /locations/l1/locations, ..., " +
-    "/locations/l1/locations/l2/.../locations"
-  )
-
-  get("""^((?:/locations/(?:[^/?#]*?))*?/locations/?)$""".r, operation(getLocations)) {
-    val path = multiParams("captures").head split "/" filter { _ != "locations" }
-    val loc = descend(path.tail)(network.loc)
-    loc map { l =>
-      renderAsJsonOrHtml(html.locations)("asdf") {
-        l.toTree.subForest map { _.loc }
-      }
-    } getOrElse {
-      NotFound(())
     }
   }
 
@@ -141,9 +130,28 @@ class SensorProxyController(implicit val swagger: Swagger) extends ScalatraServl
 
   get("""^((?:/locations/(?:[^/?#]*?))+?)/?$""".r, operation(getLocationByName)) {
     val path = multiParams("captures").head split "/" filter { _ != "locations" }
-    val loc = descend(path.tail)(network.loc)
-    loc map {
-      renderAsJsonOrHtml(html.location)(_)
+    val loc = descend(path.tail)(Stream(networkNavigable))
+    loc map { l =>
+      represent(html.location)(l.rootLabel)
+    } getOrElse {
+      NotFound(())
+    }
+  }
+
+  val getLocations = (apiOperation[Seq[Location]]("getLocations")
+    summary "Shows all locations at a given level"
+    notes "Shows all locations at the given level in the hierarchy." +
+    " Path formats: /locations, /locations/l1/locations, ..., " +
+    "/locations/l1/locations/l2/.../locations"
+  )
+
+  // TODO make DRY with preceding route
+
+  get("""^((?:/locations/(?:[^/?#]*?))*?/locations/?)$""".r, operation(getLocations)) {
+    val path = multiParams("captures").head split "/" filter { _ != "locations" } toStream
+    val loc = descend(path.tail)(Stream(networkNavigable))
+    loc map { l =>
+      represent(html.locations)(l)
     } getOrElse {
       NotFound(())
     }
