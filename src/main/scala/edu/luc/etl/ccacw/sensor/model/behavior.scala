@@ -12,17 +12,28 @@ package object model {
 
   implicit val r2t = ToTreeOps[Resource] _
 
+  implicit def matchResourceByName(res: Resource, name: String) = res.name == name
+
   // TODO validation of domain model
   // TODO auto-generate routes
 
-  implicit def dummy = new Resource { val name = "" }
-
-  def descend[T <: { def name: String }](path: Iterable[String])(locs: Stream[Tree[TreeLoc[T]]])(implicit dummy: T): Option[Tree[TreeLoc[T]]] =
+  /**
+   * Attempts to navigate into the (cojoined) tree of tree locations based on
+   * the given selection criterion and path of String elements.
+   * Each parent-to-child navigation step is a Kleisli arrow (a -> m[b]),
+   * where the monad m is Option and both a and b are Tree[TreeLoc[T]],
+   * and succeeds only if the criterion on the argument of type a is satisfied.
+   * Using such a Kleisli arrow instead of an ordinary function a -> b allows
+   * propagating any failure along the way directly as the final result,
+   * bypassing the remaining steps.
+   */
+  def descend[T](path: Iterable[String])(root: Tree[TreeLoc[T]])
+    (implicit crit: (T, String) => Boolean): Option[Tree[TreeLoc[T]]] =
     path.foldLeft {
-      some(dummy.leaf.loc.node(locs.toList: _*))
-    } { (l, s) =>
-      l flatMap {
-        _.subForest find { _.rootLabel.getLabel.name == s }
+      some(root)
+    } { (nodeOption, pathElement) =>
+      nodeOption flatMap {
+        _.subForest find { node => crit(node.rootLabel.getLabel, pathElement) }
       }
     }
 }

@@ -23,6 +23,7 @@ import data._
 // TODO distill/articulate insights on variably-composite resources
 //      (as opposed to fixed resource hierarchies)
 // TODO dependency injection of model
+// TODO correct matching of fixed path components to associations, e.g. locations versus devices
 
 class SensorProxyController(implicit val swagger: Swagger) extends ScalatraServlet
     with JacksonJsonSupport with JValueResult with ApiFormats
@@ -48,8 +49,6 @@ class SensorProxyController(implicit val swagger: Swagger) extends ScalatraServl
 
   def represent[S, T, U >: T](view: twirl.api.Template2[S, T, twirl.api.Html])(s: S)(result: U)(implicit request: HttpServletRequest, u2t: U => T) =
     if (accept("application/json")) result else view.render(s, result)
-
-  val networkNavigable = network.loc.cojoin.toTree
 
   val getRoot = (apiOperation[String]("getRoot")
     summary "Show root"
@@ -129,7 +128,7 @@ class SensorProxyController(implicit val swagger: Swagger) extends ScalatraServl
 
   get("""^((?:/locations/(?:[^/?#]*?))+?)/?$""".r, operation(getLocationByName)) {
     val path = multiParams("captures").head split "/" filter { _ != "locations" }
-    val loc = descend(path.tail)(Stream(networkNavigable))
+    val loc = descend(path.tail)(networkNavigable)
     loc map { l =>
       represent(html.location)(l.rootLabel)
     } getOrElse {
@@ -144,11 +143,11 @@ class SensorProxyController(implicit val swagger: Swagger) extends ScalatraServl
     "/locations/l1/locations/l2/.../locations"
   )
 
-  // TODO make DRY with preceding route
+  // TODO consider making DRY with preceding route
 
   get("""^((?:/locations/(?:[^/?#]*?))*?/locations/?)$""".r, operation(getLocations)) {
     val path = multiParams("captures").head split "/" filter { _ != "locations" } toStream
-    val loc = descend(path.tail)(Stream(networkNavigable))
+    val loc = descend(path.tail)(networkNavigable)
     loc map { l =>
       represent(html.locations)(l)
     } getOrElse {

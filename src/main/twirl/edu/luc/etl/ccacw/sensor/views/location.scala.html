@@ -2,6 +2,12 @@
 
 @main("Location " + l.path.toList.map(_.name).reverse.mkString("/", "/", "")) {
   <p>
-    @l.getLabel
+    <a href="/">top</a> <a href=".">up</a>
+  </p>
+  <p>
+    @l.getLabel:
+    <ul>
+      <li><a href="@(l.getLabel.name + "/locations/")">locations</a></li>
+    </ul>
   </p>
 }

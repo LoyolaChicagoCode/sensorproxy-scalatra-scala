@@ -1,7 +1,11 @@
 @(t: scalaz.Tree[scalaz.TreeLoc[edu.luc.etl.ccacw.sensor.model.Resource]])
 
 @main("Locations at " + t.rootLabel.path.toList.map(_.name).reverse.mkString("/", "/", "")) {
+  <p>
+    <a href="/">top</a>
+    <a href="@(if (t.rootLabel.getLabel.name == "root") ".." else "../../" + t.rootLabel.getLabel.name)">up</a>
+  </p>
   <ul>
-    @t.subForest.map { l => <li>@l.rootLabel.getLabel</li> }
+    @t.subForest.map { l => <li><a href="@l.rootLabel.getLabel.name">@l.rootLabel.getLabel</a></li> }
   </ul>
 }
