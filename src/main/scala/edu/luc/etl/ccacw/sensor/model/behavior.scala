@@ -27,8 +27,7 @@ package object model {
    * propagating any failure along the way directly as the final result,
    * bypassing the remaining steps.
    */
-  def descend[T](path: Iterable[String])(root: Tree[TreeLoc[T]])
-    (implicit crit: (T, String) => Boolean): Option[Tree[TreeLoc[T]]] =
+  def descend[T](path: Iterable[String])(root: Tree[TreeLoc[T]])(implicit crit: (T, String) => Boolean): Option[Tree[TreeLoc[T]]] =
     path.foldLeft {
       some(root)
     } { (nodeOption, pathElement) =>
