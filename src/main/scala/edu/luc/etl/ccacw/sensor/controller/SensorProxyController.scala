@@ -129,8 +129,8 @@ class SensorProxyController(implicit val swagger: Swagger) extends ScalatraServl
   get("""^((?:/locations/(?:[^/?#]*?))+?)/?$""".r, operation(getLocationByName)) {
     val path = multiParams("captures").head split "/" filter { _ != "locations" }
     val loc = descend(path.tail)(networkNavigable)
-    loc map { l =>
-      represent(html.location)(l.rootLabel)
+    loc map { _.rootLabel } filter { _.getLabel.isInstanceOf[Location] } map { l =>
+      represent(html.location)(l)
     } getOrElse {
       NotFound(())
     }
@@ -148,8 +148,8 @@ class SensorProxyController(implicit val swagger: Swagger) extends ScalatraServl
   get("""^((?:/locations/(?:[^/?#]*?))*?/locations/?)$""".r, operation(getLocations)) {
     val path = multiParams("captures").head split "/" filter { _ != "locations" } toStream
     val loc = descend(path.tail)(networkNavigable)
-    loc map { l =>
-      represent(html.locations)(l)
+    loc map { _.subForest filter { _.rootLabel.getLabel.isInstanceOf[Location] } } map { ls =>
+      represent(html.locations)(loc.get)(ls)
     } getOrElse {
       NotFound(())
     }
